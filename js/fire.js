@@ -4,7 +4,7 @@ const fireHeight = 70;
 
 // Fire settings (exposed for admin panel)
 const config = window.FIRE_CONFIG || {
-    speed: 60,      // ms per frame
+    speed: 60,      // ms per frame (lower = faster)
     decay: 7,       // higher = shorter flames
     wind: 0.0,      // -1.0 to 1.0
     chaos: 0.3,     // 0.0 to 1.0 (internal)
@@ -18,6 +18,11 @@ window.FIRE_CONFIG = config;
 const firePixels = new Array(fireWidth * fireHeight).fill(0);
 let fireSourceIndices = [];
 let textOverlayIndices = new Map();
+
+// DOM buffers (new)
+let pixelSpans = new Array(fireWidth * fireHeight);
+let lastChars = new Array(fireWidth * fireHeight).fill(' ');
+let lastColors = new Array(fireWidth * fireHeight).fill('');
 
 // ASCII Art for the header
 const asciiArtRaw = [
@@ -163,11 +168,13 @@ function getCurrentPalette() {
 // ------------------------------
 // FIRE INITIALIZATION
 // ------------------------------
-function init() {
+function initFire() {
     parseArtForSources();
-    gameLoop();
+    initFireDOM();
+    startFireLoop();
 }
 
+// Find which grid cells are text + where to emit flames
 function parseArtForSources() {
     const artHeight = asciiArtRaw.length;
     const artWidth = asciiArtRaw[0].length;
@@ -199,43 +206,71 @@ function parseArtForSources() {
     }
 }
 
+// Build all spans ONCE and keep references
+function initFireDOM() {
+    const stage = document.getElementById('fire-stage');
+    if (!stage) return;
+
+    stage.innerHTML = '';
+
+    for (let y = 0; y < fireHeight; y++) {
+        for (let x = 0; x < fireWidth; x++) {
+            const index = y * fireWidth + x;
+            const span = document.createElement('span');
+
+            if (textOverlayIndices.has(index)) {
+                span.textContent = textOverlayIndices.get(index);
+                span.style.color = '#FFFFFF';
+            } else {
+                span.textContent = ' ';
+            }
+
+            pixelSpans[index] = span;
+            stage.appendChild(span);
+        }
+        stage.appendChild(document.createElement('br'));
+    }
+}
+
 function updateFireSource() {
-    fireSourceIndices.forEach(index => {
-        if (Math.random() > (config.chaos * 0.2)) {
+    const chaosFactor = config.chaos * 0.2;
+    for (let i = 0; i < fireSourceIndices.length; i++) {
+        const index = fireSourceIndices[i];
+        if (Math.random() > chaosFactor) {
             firePixels[index] = 30 + Math.floor(Math.random() * 7);
         } else {
             firePixels[index] = Math.max(0, firePixels[index] - 10);
         }
-    });
+    }
 }
 
 function spreadFire(src) {
     const pixel = firePixels[src];
-
     if (pixel === 0) {
-        firePixels[src - fireWidth] = 0;
-    } else {
-        const rand = Math.random();
-        const decay = Math.floor(rand * config.decay);
+        const dest = src - fireWidth;
+        if (dest >= 0) firePixels[dest] = 0;
+        return;
+    }
 
-        let wind = 0;
-        const windRoll = Math.random() + (config.wind * 0.5);
-        if (windRoll < 0.33) wind = -1;
-        else if (windRoll > 0.66) wind = 1;
+    const decay = Math.floor(Math.random() * config.decay);
+    let wind = 0;
 
-        if (config.wind > 1) wind = 1;
-        if (config.wind < -1) wind = -1;
+    const windRoll = Math.random() + (config.wind * 0.5);
+    if (windRoll < 0.33) wind = -1;
+    else if (windRoll > 0.66) wind = 1;
 
-        const destIndex = src - fireWidth + wind;
+    if (config.wind > 1) wind = 1;
+    if (config.wind < -1) wind = -1;
 
-        if (destIndex >= 0 && destIndex < firePixels.length) {
-            const currentRow = Math.floor(src / fireWidth);
-            const destRow = Math.floor(destIndex / fireWidth);
-            if (destRow !== currentRow - 1) return;
+    const destIndex = src - fireWidth + wind;
 
-            const newHeat = pixel - decay;
-            firePixels[destIndex] = newHeat > 0 ? newHeat : 0;
-        }
+    if (destIndex >= 0 && destIndex < firePixels.length) {
+        const currentRow = Math.floor(src / fireWidth);
+        const destRow = Math.floor(destIndex / fireWidth);
+        if (destRow !== currentRow - 1) return;
+
+        const newHeat = pixel - decay;
+        firePixels[destIndex] = newHeat > 0 ? newHeat : 0;
     }
 }
 
@@ -249,58 +284,78 @@ function getCharForHeat(heat) {
     return rand > 0.5 ? '(' : ')';
 }
 
+// Render using prebuilt spans, only updating when needed
 function renderFire() {
-    let html = '';
     const palette = getCurrentPalette();
 
-    for (let y = 0; y < fireHeight; y++) {
-        let row = '';
+    for (let index = 0; index < firePixels.length; index++) {
+        // skip overlay text cells
+        if (textOverlayIndices.has(index)) continue;
 
-        for (let x = 0; x < fireWidth; x++) {
-            const index = y * fireWidth + x;
+        const span = pixelSpans[index];
+        if (!span) continue;
 
-            if (textOverlayIndices.has(index)) {
-                row += `<span style="color: #FFFFFF;">${textOverlayIndices.get(index)}</span>`;
-                continue;
+        const heat = firePixels[index];
+
+        if (heat <= 0) {
+            if (lastChars[index] !== ' ' || lastColors[index] !== '') {
+                span.textContent = ' ';
+                span.style.color = '';
+                span.style.textShadow = '';
+                lastChars[index] = ' ';
+                lastColors[index] = '';
             }
-
-            const heat = firePixels[index];
-
-            if (heat > 0) {
-                const color = palette[heat] || palette[palette.length - 1];
-                const char = getCharForHeat(heat);
-                const rgb = `rgb(${color.r},${color.g},${color.b})`;
-
-                const shadow = heat > 28 ? `text-shadow: 0 0 4px ${rgb};` : '';
-
-                row += `<span style="color: ${rgb}; ${shadow}">${char}</span>`;
-            } else {
-                row += `<span> </span>`;
-            }
+            continue;
         }
 
-        html += row + '<br>';
-    }
+        const color = palette[heat] || palette[palette.length - 1];
+        const rgb = `rgb(${color.r},${color.g},${color.b})`;
+        const char = getCharForHeat(heat);
 
-    const stage = document.getElementById('fire-stage');
-    if (stage) {
-        stage.innerHTML = html;
+        // only touch DOM if something changed
+        if (lastChars[index] !== char) {
+            span.textContent = char;
+            lastChars[index] = char;
+        }
+        if (lastColors[index] !== rgb) {
+            span.style.color = rgb;
+            span.style.textShadow = heat > 28 ? `0 0 4px ${rgb}` : '';
+            lastColors[index] = rgb;
+        }
     }
 }
 
 function updateFire() {
     updateFireSource();
+
     for (let x = 0; x < fireWidth; x++) {
         for (let y = 1; y < fireHeight; y++) {
             spreadFire(y * fireWidth + x);
         }
     }
+
     renderFire();
 }
 
-function gameLoop() {
-    updateFire();
-    setTimeout(gameLoop, config.speed);
+// ---- Main loop using requestAnimationFrame ----
+let lastFrameTime = 0;
+
+function fireLoop(timestamp) {
+    if (!lastFrameTime) lastFrameTime = timestamp;
+
+    const delta = timestamp - lastFrameTime;
+    if (delta >= config.speed) {
+        updateFire();
+        lastFrameTime = timestamp;
+    }
+
+    requestAnimationFrame(fireLoop);
 }
 
-init();
+// to avoid name clash with other init()
+function startFireLoop() {
+    requestAnimationFrame(fireLoop);
+}
+
+// kick it off
+initFire();

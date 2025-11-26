@@ -20,12 +20,26 @@ function openAdminPanel() {
     panel.classList.remove("admin-hidden");
 
     const win = document.getElementById("admin-window");
-    win.style.left = "50%";
-    win.style.top = "50%";
-    win.style.transform = "translate(-50%, -50%)";
+
+    // clear any previous transform
+    win.style.transform = "";
+    // temporarily position so we can measure size
+    win.style.left = "0px";
+    win.style.top = "0px";
+
+    // measure window size
+    const rect = win.getBoundingClientRect();
+
+    // center using real pixel positions
+    const x = (window.innerWidth - rect.width) / 2;
+    const y = (window.innerHeight - rect.height) / 2;
+
+    win.style.left = `${Math.max(0, x)}px`;
+    win.style.top = `${Math.max(0, y)}px`;
 
     showAdminView("panel");
 }
+
 
 function closeAdminPanel() {
     const panel = document.getElementById("admin-panel");
