@@ -1,0 +1,44 @@
+/* ===== CUSTOM PAGE SCROLLBAR ===== */
+
+/* Hide native scrollbar but keep scrolling */
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;          /* still scrolls with wheel/keys */
+    scrollbar-width: none;     /* Firefox: hide default scrollbar */
+}
+
+/* Chrome / Edge / Safari: hide default scrollbar */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
+}
+
+/* Custom scrollbar bar on the LEFT side */
+#custom-scrollbar {
+    position: fixed;
+    left: 0;                   /* flush against the left edge */
+    top: 0;
+    bottom: 0;
+    width: 10px;
+    background: #000000;       /* full black bar */
+    border-right: 1px solid #ffffff;  /* white outline like your UI */
+    z-index: 999000;           /* above page content, below overlays if needed */
+}
+
+/* White thumb (the draggable part) */
+#custom-scroll-thumb {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 60px;              /* JS will resize this; this is just a default */
+    background: #ffffff;       /* white thumb */
+    border: 1px solid #ffffff; /* white border */
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+/* Hover feedback */
+#custom-scroll-thumb:hover {
+    background: #e5e5e5;       /* tiny gray so you can see hover */
+}

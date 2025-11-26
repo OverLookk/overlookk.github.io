@@ -1,0 +1,295 @@
+/* Transparent overlay: no darkening the page */
+#admin-panel {
+    position: fixed;
+    inset: 0;
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+    pointer-events: none; /* clicks pass through the overlay */
+}
+
+.admin-hidden {
+    display: none !important;
+}
+
+/* Window */
+#admin-window {
+    width: 420px;
+    background: #000;
+    border: 1px solid #fff;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+    position: absolute;
+    pointer-events: auto; /* window itself can be interacted with */
+}
+
+/* Title bar like a real window */
+#admin-titlebar {
+    background: #000;
+    color: #fff;
+    padding: 4px 8px;
+    border-bottom: 1px solid #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+    font-size: 14px;
+}
+
+#admin-titlebar:active {
+    cursor: grabbing;
+}
+
+#admin-title-text {
+    white-space: nowrap;
+}
+
+/* Title bar buttons (back + close) as plain text */
+#admin-title-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.admin-title-btn {
+    background: transparent;
+    color: #fff;
+    border: none;
+    padding: 0;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.admin-title-btn:hover {
+    color: #ccc;
+}
+
+/* Content area */
+#admin-content {
+    padding: 10px;
+    max-height: 70vh;
+    overflow-y: auto;
+    color: #ddd;
+    background: #000;
+}
+
+/* Views */
+.admin-view {
+    display: none;
+}
+
+.admin-view-active {
+    display: block;
+}
+
+/* File-style menu list */
+.admin-file-list {
+    padding-left: 10px;
+    margin-top: 4px;
+    font-size: 13px;
+}
+
+.admin-file-link {
+    display: block;
+    background: transparent;
+    border: none;
+    color: #fff;
+    text-align: left;
+    padding: 1px 0;
+    margin: 1px 0;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.admin-file-link:hover .admin-file-name {
+    color: #aaa;
+}
+
+.admin-file-glyph {
+    display: inline-block;
+    width: 14px;
+}
+
+.admin-file-name {
+    text-decoration: underline;
+}
+
+/* Section styling */
+.admin-section {
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+/* Labels */
+.admin-section label {
+    display: block;
+    margin-top: 6px;
+    margin-bottom: 2px;
+    color: #ccc;
+}
+
+/* Smaller sliders */
+.admin-section input[type=range] {
+    width: 100%;
+    appearance: none;
+    background: #111;
+    height: 3px;
+    outline: none;
+    border-radius: 0;
+    margin-bottom: 4px;
+}
+
+.admin-section input[type=range]::-webkit-slider-thumb {
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.admin-section input[type=range]::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    cursor: pointer;
+}
+
+/* (Kept in case we use native selects elsewhere) */
+.admin-section select {
+    width: 100%;
+    background: #000;
+    color: #eee;
+    border: 1px solid #fff;
+    padding: 3px 4px;
+    font-size: 13px;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+    margin-top: 2px;
+}
+
+.admin-section select option {
+    background: #000;
+    color: #eee;
+}
+
+/* Notes / placeholder text */
+.admin-note {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+}
+
+/* CUSTOM DROPDOWNS */
+.admin-dropdown {
+    position: relative;
+    margin-top: 2px;
+    font-size: 13px;
+}
+
+.admin-dropdown-display {
+    border: 1px solid #fff;
+    background: #000;
+    color: #eee;
+    padding: 3px 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-dropdown-display::after {
+    content: "▾";
+    font-size: 10px;
+    margin-left: 6px;
+}
+
+.admin-dropdown-list {
+    position: fixed;              /* float over everything */
+    background: #000;
+    border: 1px solid #fff;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: none;
+    z-index: 1000000;
+}
+
+
+.admin-dropdown.open .admin-dropdown-list {
+    display: block;
+}
+
+.admin-dropdown-list li {
+    padding: 3px 4px;
+    cursor: pointer;
+    color: #eee;
+}
+
+.admin-dropdown-list li:hover {
+    background: #333;
+}
+
+/* HUD ICONS (bottom-right) */
+#hud-icons {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    gap: 6px;
+    z-index: 1000000;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+}
+
+.hud-icon {
+    width: 26px;
+    height: 26px;
+    border: 1px solid #fff;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    position: relative;
+}
+
+.hud-icon:hover {
+    background: #111;
+}
+
+
+.hud-icon-muted::after {
+    content: "";
+    position: absolute;
+    width: 80%;
+    height: 2px;
+    background: #fff;
+    transform: rotate(-45deg);
+}
+
+.admin-music-info {
+    margin-bottom: 4px;
+}
+
+.admin-music-buttons {
+    margin-top: 6px;
+    display: flex;
+    gap: 6px;
+}
+
+.admin-ctrl-btn {
+    background: #000;
+    color: #fff;
+    border: 1px solid #fff;
+    padding: 3px 10px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.admin-ctrl-btn:hover {
+    background: #111;
+}

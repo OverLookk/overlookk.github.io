@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OverLook - web</title>
+
+
+<!-- CUSTOM SCROLLBAR -->
+<div id="custom-scrollbar">
+    <div id="custom-scroll-thumb"></div>
+</div>
+
+<script src="js/scrollbar.js"></script>
+<link rel="stylesheet" href="css/scrollbar.css">
+
+
+<!-- FIRE HEADER SECTION -->
+<link rel="stylesheet" href="css/fire.css">
+
+<div id="fire-stage"></div>
+
+<script src="js/fire.js"></script>
+
+
+<!-- AUDIO WAVEFORM SECTION -->
+<link rel="stylesheet" href="css/visualizer.css">
+
+<section id="audio-visualizer-section">
+    <div id="waveform-visualizer" aria-hidden="true"></div>
+</section>
+
+<script src="js/visualizer.js"></script>
+
+
+<!-- ADMIN PANEL (hidden until activated by typing "admin") -->
+<div id="admin-panel" class="admin-hidden">
+    <div id="admin-window">
+        <div id="admin-titlebar">
+            <span id="admin-title-text">admin - panel</span>
+            <div id="admin-title-buttons">
+                <span id="admin-back" class="admin-title-btn" title="Back">◀</span>
+                <span id="admin-close" class="admin-title-btn" title="Close">X</span>
+            </div>
+        </div>
+
+        <div id="admin-content">
+            <!-- MAIN PANEL: file-style menu -->
+            <div id="admin-view-panel" class="admin-view admin-view-active">
+                <div class="admin-file-list">
+                    <button class="admin-file-link" data-view="fire">
+                        <span class="admin-file-glyph">├</span>
+                        <span class="admin-file-name">fire.config</span>
+                    </button>
+                    <button class="admin-file-link" data-view="visualizer">
+                        <span class="admin-file-glyph">├</span>
+                        <span class="admin-file-name">visualizer.config</span>
+                    </button>
+                    <button class="admin-file-link" data-view="music">
+                        <span class="admin-file-glyph">├</span>
+                        <span class="admin-file-name">music.control</span>
+                    </button>
+                    <button class="admin-file-link" data-view="other">
+                        <span class="admin-file-glyph">└</span>
+                        <span class="admin-file-name">other</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- FIRE CONFIG VIEW -->
+            <div id="admin-view-fire" class="admin-view">
+                <h3>fire.config</h3>
+
+                <div class="admin-section">
+                    <label>Speed - <span id="admin-fire-speed-value"></span></label>
+                    <input id="admin-fire-speed" type="range" min="10" max="200" step="5">
+
+                    <label>Decay - <span id="admin-fire-decay-value"></span></label>
+                    <input id="admin-fire-decay" type="range" min="1" max="10" step="0.5">
+
+                    <label>Wind - <span id="admin-fire-wind-value"></span></label>
+                    <input id="admin-fire-wind" type="range" min="-1" max="1" step="0.1">
+
+                    <label>Palette</label>
+                    <div class="admin-dropdown" id="admin-fire-palette-dropdown">
+                        <div class="admin-dropdown-display" id="admin-fire-palette-display"></div>
+                        <ul class="admin-dropdown-list" id="admin-fire-palette-list">
+                            <li data-value="red">red</li>
+                            <li data-value="purple">purple</li>
+                            <li data-value="green">green</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISUALIZER CONFIG VIEW -->
+            <div id="admin-view-visualizer" class="admin-view">
+                <h3>visualizer.config</h3>
+
+                <div class="admin-section">
+                    <label>Amplitude - <span id="admin-amp-value"></span></label>
+                    <input id="admin-amp" type="range" min="0.1" max="6" step="0.1">
+
+                    <label>Smoothing - <span id="admin-smooth-value"></span></label>
+                    <input id="admin-smooth" type="range" min="0" max="1" step="0.1">
+
+                    <label>Mode</label>
+                    <div class="admin-dropdown" id="admin-mode-dropdown">
+                        <div class="admin-dropdown-display" id="admin-mode-display"></div>
+                        <ul class="admin-dropdown-list" id="admin-mode-list">
+                            <li data-value="left">left</li>
+                            <li data-value="center">center</li>
+                            <li data-value="mirror">mirror</li>
+                            <li data-value="wave">wave</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MUSIC CONTROL VIEW -->
+            <div id="admin-view-music" class="admin-view">
+                <h3>music.control</h3>
+
+                <div class="admin-section">
+                    <div class="admin-music-info">
+                        Track: <span id="admin-music-title">(no track)</span>
+                    </div>
+                    <div class="admin-music-info">
+                        Time: <span id="admin-music-time">0:00-0:00</span>
+                    </div>
+                    <div class="admin-music-buttons">
+                        <button id="admin-music-pause" class="admin-ctrl-btn">Pause</button>
+                        <button id="admin-music-skip" class="admin-ctrl-btn">Skip</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OTHER VIEW -->
+            <div id="admin-view-other" class="admin-view">
+                <h3>other</h3>
+                <p class="admin-note">Reserved for future tweaks.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="css/admin.css">
+<script src="js/admin.js"></script>
+
+
+<!-- HUD ICONS (bottom-right) -->
+<div id="hud-icons">
+        <div id="hud-admin" class="hud-icon" title="Open admin panel">
+        <span id="hud-admin-symbol">⚙</span>
+    </div>
+    <div id="hud-music" class="hud-icon" title="Toggle music">
+        <span id="hud-music-symbol">♪</span>
+    </div>
+</div>
+
+
+<!-- PROJECTS SECTION -->
+<section id="projects-section">
+    <h2 id="projects-header">projects - 6</h2>
+
+<!-- WEIGHT-CALC -->
+    <div class="project-card">
+        <div class="project-card-header">
+            <span class="project-title">weight-calc</span>
+            <span class="project-date">Last updated: 2025-1-25</span>
+        </div>
+
+        <p class="project-notes">
+            Simple lifting calculator: enter your PR weight and wanted percentage and it tells you exactly how much to load on the bar — total weight, plate breakdown per side, and more.
+        </p>
+
+        <div class="project-links">
+            <a href="https://overlookk.github.io/weight-calc/" target="_blank" rel="noopener">[ live site ]</a>
+            <a href="https://github.com/OverLookk/weight-calc" target="_blank" rel="noopener">[ source ]</a>
+        </div>
+    </div>
+
+<!-- GATSBY-VOCAB-QUIZ -->
+    <div class="project-card">
+        <div class="project-card-header">
+            <span class="project-title">Gatsby-Vocab-Quiz</span>
+            <span class="project-date">Last updated: 2025-1-16</span>
+        </div>
+
+        <p class="project-notes">
+            Vocabulary quiz project for my junior English class — 20 multiple-choice questions with images covering words from chapters 1–3 of The Great Gatsby, with all artwork drawn by me and my girlfriend.
+        </p>
+
+        <div class="project-links">
+            <a href="https://overlookk.github.io/Gatsby-Vocab-Quiz/" target="_blank" rel="noopener">[ live site ]</a>
+            <a href="https://github.com/OverLookk/Gatsby-Vocab-Quiz" target="_blank" rel="noopener">[ source ]</a>
+        </div>
+    </div>
+
+<!-- SCRATCH-USER-INDEX -->
+    <div class="project-card">
+        <div class="project-card-header">
+            <span class="project-title">scratch-user-index</span>
+            <span class="project-date">Last updated: 2025-1-5</span>
+        </div>
+
+        <p class="project-notes">
+            Large index made up of 29,105,351 unique Scratch usernames I gathered while exploring web-scraping, successfully collecting all public available scratch usernames. Purposely made after I found the absence of scratch user search engine frustrating.
+        </p>
+
+        <div class="project-links">
+            <a href="https://github.com/OverLookk/scratch-user-index" target="_blank" rel="noopener">[ source ]</a>
+        </div>
+    </div>
+
+<!-- QVXP -->
+        <div class="project-card">
+        <div class="project-card-header">
+            <span class="project-title">qvxp</span>
+            <span class="project-date">Last updated: 2024-11-11</span>
+        </div>
+
+        <p class="project-notes">
+            Similar to my previous project “55hub”, qvxp is a game hub I built in my junior year — using the ruffle flash emulator to nearly any game, and adding bookmarklets to quickly use javascript tools on my school’s locked-down chromebooks.
+        </p>
+        <div class="project-links">
+            <a href="https://overlookk.github.io/qvxp/" target="_blank" rel="noopener">[ live site ]</a>
+            <a href="https://github.com/OverLookk/qvxp" target="_blank" rel="noopener">[ source ]</a>
+        </div>
+    </div>
+
+<!-- 55HUB -->
+        <div class="project-card">
+        <div class="project-card-header">
+            <span class="project-title">55hub</span>
+            <span class="project-date">Last updated: 2024-10-2</span>
+        </div>
+
+        <p class="project-notes">
+            Simple game hub I built in my sophomore year — a collection of my friends’ favorite games, built-in proxies to bypass school filters, hidden pages, saved links, and more.
+        </p>
+
+        <div class="project-links">
+            <a href="https://overlookk.github.io/55hub/" target="_blank" rel="noopener">[ live site ]</a>
+            <a href="https://github.com/OverLookk/55hub" target="_blank" rel="noopener">[ source ]</a>
+        </div>
+    </div>
+
+<!-- ACC-OVERLOOKK -->
+        <div class="project-card">
+        <div class="project-card-header">
+            <span class="project-title">AAC-OverLookk</span>
+            <span class="project-date">Last updated: 2024-9-4</span>
+        </div>
+
+        <p class="project-notes">
+            Advanced auto-clicker built with Python, tkinter, and Windows API for fast and configurable clicking — adjustable intervals down to microseconds, custom toggle keys, multiple mouse buttons, achieving upwards of 15,000+ clicks per-second.
+        </p>
+
+        <div class="project-links">
+            <a href="https://github.com/OverLookk/AAC-OverLookk" target="_blank" rel="noopener">[ source ]</a>
+        </div>
+    </div>
+
+ <p id="projects-note">
+        i have more projects than these — i just found these the most note-worthy.
+    </p>
+
+</section>
+
+<link rel="stylesheet" href="css/projects.css">
+
+
+<!-- SOCIALS -->
+<div id="socials-footer-links">
+    <a href="https://github.com/OverLookk" target="_blank" rel="noopener" class="socials-btn">
+        GITHUB
+    </a>
+    <a href="https://discord.com/users/595723074729672705" target="_blank" rel="noopener" class="socials-btn">
+        DISCORD
+    </a>
+</div>
+
+<link rel="stylesheet" href="css/socials.css">
+
+
+</html>
