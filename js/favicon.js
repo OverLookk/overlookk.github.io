@@ -1,106 +1,92 @@
-(function () {
-  const size = 64; // favicon canvas size
+window.addEventListener("load", () => {
+    console.log("[favicon] script loaded");
 
-  // Scene & transparent renderer
-  const scene = new THREE.Scene();
+    const size = 32; // favicon size (browser will downscale if needed)
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
 
-  const camera = new THREE.PerspectiveCamera(
-    45,
-    1,
-    0.1,
-    1000
-  );
-  // angled camera: height 2.9, distance 3.8
-  camera.position.set(0, 2.9, 3.8);
-  camera.lookAt(0, 0, 0);
+    // list of your frame images in /assets
+    const frameSources = [
+        "assets/frame_00_delay-0.04s.jpeg",
+        "assets/frame_01_delay-0.04s.jpeg",
+        "assets/frame_02_delay-0.04s.jpeg",
+        "assets/frame_03_delay-0.04s.jpeg",
+        "assets/frame_04_delay-0.04s.jpeg",
+        "assets/frame_05_delay-0.04s.jpeg",
+        "assets/frame_06_delay-0.04s.jpeg",
+        "assets/frame_07_delay-0.04s.jpeg",
+        "assets/frame_08_delay-0.04s.jpeg",
+        "assets/frame_09_delay-0.04s.jpeg",
+        "assets/frame_10_delay-0.04s.jpeg",
+        "assets/frame_11_delay-0.04s.jpeg",
+        "assets/frame_12_delay-0.04s.jpeg",
+        "assets/frame_13_delay-0.04s.jpeg",
+        "assets/frame_14_delay-0.04s.jpeg"
+    ];
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(1);
-  renderer.setSize(size, size);
-  renderer.setClearColor(0x000000, 0); // transparent background
+    const frames = [];
+    let loadedCount = 0;
 
-  // Group for the globe so we can tilt it
-  const globeGroup = new THREE.Group();
-  scene.add(globeGroup);
+    // find or create favicon link element
+    const faviconEl = (function () {
+        let el = document.getElementById("dynamic-favicon");
+        if (!el) {
+            el = document.createElement("link");
+            el.id = "dynamic-favicon";
+            el.rel = "icon";
+            el.type = "image/png";
+            document.head.appendChild(el);
+        }
+        return el;
+    })();
 
-  // Slight tilt so rotation is clearly visible
-  globeGroup.rotation.x = 0.45;
+    // preload all frames
+    frameSources.forEach((src, index) => {
+        const img = new Image();
+        img.onload = () => {
+            frames[index] = img;
+            loadedCount++;
+            if (loadedCount === frameSources.length) {
+                console.log("[favicon] all frames loaded");
+                startAnimation();
+            }
+        };
+        img.onerror = (e) => {
+            console.warn("[favicon] failed to load frame:", src, e);
+        };
+        img.src = src;
+    });
 
-  // EXTRA LOW POLY square/lat-long grid globe in purple
-  const radius = 1.4;
-  const latSteps = 6;  // fewer steps = chunkier bands
-  const lonSteps = 8;  // fewer meridians = bigger squares
+    function drawFrame(frameIndex) {
+        const img = frames[frameIndex];
+        if (!img) return;
 
-  const lineMaterial = new THREE.LineBasicMaterial({
-    color: 0xbf5fff, // purple
-    transparent: true,
-    opacity: 1.0
-  });
+        ctx.clearRect(0, 0, size, size);
 
-  // Latitudes
-  for (let i = 1; i < latSteps; i++) {
-    const phi = (i / latSteps) * Math.PI - Math.PI / 2; // -pi/2..pi/2
-    const segments = lonSteps;
-    const positions = [];
-    for (let j = 0; j <= segments; j++) {
-      const theta = (j / segments) * Math.PI * 2;
-      const x = radius * Math.cos(phi) * Math.cos(theta);
-      const y = radius * Math.sin(phi);
-      const z = radius * Math.cos(phi) * Math.sin(theta);
-      positions.push(x, y, z);
+        // draw the frame scaled into the favicon canvas
+        ctx.drawImage(img, 0, 0, size, size);
+
+        try {
+            const url = canvas.toDataURL("image/png");
+            faviconEl.href = url;
+        } catch (e) {
+            console.warn("[favicon] toDataURL failed", e);
+        }
     }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    const line = new THREE.LineLoop(geo, lineMaterial);
-    globeGroup.add(line);
-  }
 
-  // Longitudes
-  for (let i = 0; i < lonSteps; i++) {
-    const theta = (i / lonSteps) * Math.PI * 2;
-    const segments = latSteps;
-    const positions = [];
-    for (let j = 0; j <= segments; j++) {
-      const t = j / segments;
-      const phi = t * Math.PI - Math.PI / 2;
-      const x = radius * Math.cos(phi) * Math.cos(theta);
-      const y = radius * Math.sin(phi);
-      const z = radius * Math.cos(phi) * Math.sin(theta);
-      positions.push(x, y, z);
+    function startAnimation() {
+        let current = 0;
+        const total = frames.length;
+        const frameDelay = 40; // ms, matches your 0.04s-ish
+
+        function tick() {
+            drawFrame(current);
+            current = (current + 1) % total;
+            setTimeout(tick, frameDelay);
+        }
+
+        tick();
     }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    const line = new THREE.Line(geo, lineMaterial);
-    globeGroup.add(line);
-  }
-
-  const faviconEl = (function () {
-    let el = document.getElementById("globe-favicon");
-    if (!el) {
-      el = document.createElement("link");
-      el.id = "globe-favicon";
-      el.rel = "icon";
-      document.head.appendChild(el);
-    }
-    return el;
-  })();
-
-  const speed = 0.004; // clockwise
-
-  function updateFavicon() {
-    renderer.render(scene, camera);
-    faviconEl.href = renderer.domElement.toDataURL("image/png");
-  }
-
-  function animate() {
-    requestAnimationFrame(animate);
-
-    // Spin + slight wobble so motion is obvious even at favicon size
-    globeGroup.rotation.y -= speed;
-    globeGroup.rotation.z += speed * 0.5;
-
-    updateFavicon();
-  }
-
-  animate();
-})();
+});
